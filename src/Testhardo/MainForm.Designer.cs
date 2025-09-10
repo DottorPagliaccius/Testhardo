@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             MethodsFlowPanel = new FlowLayoutPanel();
             ImportButton = new ReaLTaiizor.Controls.MaterialButton();
             ActionFilterTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
@@ -137,7 +138,7 @@
             TagFilterComboBox.DropDownHeight = 174;
             TagFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             TagFilterComboBox.DropDownWidth = 121;
-            TagFilterComboBox.Font = new Font("Roboto Medium", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
+            TagFilterComboBox.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Pixel);
             TagFilterComboBox.ForeColor = Color.FromArgb(222, 0, 0, 0);
             TagFilterComboBox.FormattingEnabled = true;
             TagFilterComboBox.Hint = "Filter by tag";
@@ -164,6 +165,7 @@
             Controls.Add(ImportButton);
             Controls.Add(MethodsFlowPanel);
             ForeColor = Color.White;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "Testhardo!";
             TransparencyKey = Color.Fuchsia;

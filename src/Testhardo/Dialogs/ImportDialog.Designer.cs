@@ -31,6 +31,7 @@ partial class ImportDialog
         ImportButton = new ReaLTaiizor.Controls.MaterialButton();
         ExitButton = new ReaLTaiizor.Controls.MaterialButton();
         SwaggerUrlTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
+        ErrorLabel = new ReaLTaiizor.Controls.MaterialLabel();
         SuspendLayout();
         // 
         // ImportButton
@@ -50,7 +51,7 @@ partial class ImportDialog
         ImportButton.Name = "ImportButton";
         ImportButton.NoAccentTextColor = Color.Empty;
         ImportButton.Size = new Size(76, 36);
-        ImportButton.TabIndex = 0;
+        ImportButton.TabIndex = 3;
         ImportButton.Text = "Import";
         ImportButton.Type = ReaLTaiizor.Controls.MaterialButton.MaterialButtonType.Contained;
         ImportButton.UseAccentColor = false;
@@ -73,7 +74,7 @@ partial class ImportDialog
         ExitButton.Name = "ExitButton";
         ExitButton.NoAccentTextColor = Color.Empty;
         ExitButton.Size = new Size(77, 36);
-        ExitButton.TabIndex = 1;
+        ExitButton.TabIndex = 2;
         ExitButton.Text = "cancel";
         ExitButton.Type = ReaLTaiizor.Controls.MaterialButton.MaterialButtonType.Contained;
         ExitButton.UseAccentColor = true;
@@ -115,6 +116,18 @@ partial class ImportDialog
         SwaggerUrlTextBox.UseSystemPasswordChar = false;
         SwaggerUrlTextBox.TextChanged += SwaggerUrlTextBox_TextChanged;
         // 
+        // ErrorLabel
+        // 
+        ErrorLabel.Depth = 0;
+        ErrorLabel.Font = new Font("Roboto", 12F, FontStyle.Regular, GraphicsUnit.Pixel);
+        ErrorLabel.FontType = ReaLTaiizor.Manager.MaterialSkinManager.FontType.Caption;
+        ErrorLabel.Location = new Point(6, 81);
+        ErrorLabel.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
+        ErrorLabel.Name = "ErrorLabel";
+        ErrorLabel.Size = new Size(644, 37);
+        ErrorLabel.TabIndex = 2;
+        ErrorLabel.UseAccent = true;
+        // 
         // ImportDialog
         // 
         AcceptButton = ImportButton;
@@ -122,6 +135,7 @@ partial class ImportDialog
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(825, 126);
         ControlBox = false;
+        Controls.Add(ErrorLabel);
         Controls.Add(SwaggerUrlTextBox);
         Controls.Add(ExitButton);
         Controls.Add(ImportButton);
@@ -143,4 +157,5 @@ partial class ImportDialog
     private ReaLTaiizor.Controls.MaterialButton ImportButton;
     private ReaLTaiizor.Controls.MaterialButton ExitButton;
     private ReaLTaiizor.Controls.MaterialTextBoxEdit SwaggerUrlTextBox;
+    private ReaLTaiizor.Controls.MaterialLabel ErrorLabel;
 }

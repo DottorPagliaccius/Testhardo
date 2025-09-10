@@ -1,6 +1,7 @@
 ﻿using ReaLTaiizor.Forms;
 using System.ComponentModel;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Testhardo;
@@ -35,6 +36,8 @@ public partial class ImportDialog : MaterialForm
 
     private async void ImportButton_Click(object sender, EventArgs e)
     {
+        ErrorLabel.Text = string.Empty;
+
         Enabled = false;
         Cursor = Cursors.WaitCursor;
 
@@ -73,10 +76,17 @@ public partial class ImportDialog : MaterialForm
 
             OpenApiDocument = await response.Content.ReadFromJsonAsync<OpenApiDocument>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException)
         {
-            //TODO: show error without messagebox
-            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ErrorLabel.Text = "Error fetching Swagger document";
+        }
+        catch (JsonException)
+        {
+            ErrorLabel.Text = "Error parsing Swagger document";
+        }
+        catch (Exception)
+        {
+            ErrorLabel.Text = "Unexpected error";
         }
     }
 

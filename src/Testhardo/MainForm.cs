@@ -3,6 +3,7 @@ using ReaLTaiizor.Controls;
 using ReaLTaiizor.Forms;
 using ReaLTaiizor.Manager;
 using ReaLTaiizor.Util;
+using Testhardo.Properties;
 
 namespace Testhardo;
 
@@ -88,6 +89,8 @@ public partial class MainForm : MaterialForm
         {
             Text = $"{httpVerb} {actionName.AsSpan(1)}",
             Cursor = Cursors.Hand,
+            Icon = GetActionIcon(httpVerb),
+            IconType = MaterialButton.MaterialIconType.Default,
             Tag = new Action
             {
                 BaseUri = baseUrl,
@@ -102,6 +105,15 @@ public partial class MainForm : MaterialForm
         MethodsFlowPanel.Controls.Add(button);
     }
 
+    private static Bitmap? GetActionIcon(string httpVerb) => httpVerb switch
+    {
+        HttpVerbs.Get => Resources.get,
+        HttpVerbs.Post => Resources.download_white,
+        HttpVerbs.Put => null,//Resources.put;
+        HttpVerbs.Delete => null,//Resources.delete;
+        _ => null,
+    };
+
     private void Filter(string? actionName, string? tag)
     {
         if (string.IsNullOrEmpty(actionName) && string.IsNullOrEmpty(tag))
@@ -115,11 +127,11 @@ public partial class MainForm : MaterialForm
         {
             foreach (var control in MethodsFlowPanel.Controls.OfType<MaterialButton>())
             {
-                var actionNameFound = !string.IsNullOrEmpty(actionName) && control.Text.Contains(actionName, StringComparison.OrdinalIgnoreCase);
+                var actionNameFound = string.IsNullOrEmpty(actionName) || control.Text.Contains(actionName, StringComparison.OrdinalIgnoreCase);
 
                 var action = (Action?)control.Tag;
 
-                var tagFound = !string.IsNullOrEmpty(tag) && action?.Operation.Tags.Any(x => x.Contains(tag, StringComparison.OrdinalIgnoreCase)) == true;
+                var tagFound = string.IsNullOrEmpty(tag) || action?.Operation.Tags.Any(x => x.Contains(tag, StringComparison.OrdinalIgnoreCase)) == true;
 
                 control.Visible = actionNameFound && tagFound;
             }
