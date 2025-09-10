@@ -7,8 +7,13 @@ namespace Testhardo;
 
 internal static class Program
 {
-    public static JsonSerializerOptions DefaultJsonSerializerOptions { get; set; } = new JsonSerializerOptions { WriteIndented = true, AllowTrailingCommas = true };
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
+    public static JsonSerializerOptions DefaultJsonSerializerOptions { get; set; } = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
+    };
 
     [STAThread]
     static void Main()
