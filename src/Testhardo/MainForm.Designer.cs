@@ -29,25 +29,33 @@
         private void InitializeComponent()
         {
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            MethodsFlowPanel = new FlowLayoutPanel();
+            MethodsPanel = new FlowLayoutPanel();
             ImportButton = new ReaLTaiizor.Controls.MaterialButton();
             ActionFilterTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
             ToolTipManager = new ReaLTaiizor.Controls.PoisonToolTip();
             FilterButton = new ReaLTaiizor.Controls.MaterialButton();
             TagFilterComboBox = new ReaLTaiizor.Controls.MaterialComboBox();
-            materialDivider1 = new ReaLTaiizor.Controls.MaterialDivider();
+            MainPanel = new Panel();
+            LeftSplitter = new Splitter();
+            PlanPanel = new Panel();
+            StoryPanel = new FlowLayoutPanel();
+            RunPanel = new Panel();
+            RightSplitter = new Splitter();
+            MainPanel.SuspendLayout();
+            PlanPanel.SuspendLayout();
+            RunPanel.SuspendLayout();
             SuspendLayout();
             // 
-            // MethodsFlowPanel
+            // MethodsPanel
             // 
-            MethodsFlowPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            MethodsFlowPanel.AutoScroll = true;
-            MethodsFlowPanel.FlowDirection = FlowDirection.TopDown;
-            MethodsFlowPanel.Location = new Point(7, 190);
-            MethodsFlowPanel.Name = "MethodsFlowPanel";
-            MethodsFlowPanel.Size = new Size(615, 444);
-            MethodsFlowPanel.TabIndex = 3;
-            MethodsFlowPanel.WrapContents = false;
+            MethodsPanel.AutoScroll = true;
+            MethodsPanel.Dock = DockStyle.Left;
+            MethodsPanel.FlowDirection = FlowDirection.TopDown;
+            MethodsPanel.Location = new Point(0, 0);
+            MethodsPanel.Name = "MethodsPanel";
+            MethodsPanel.Size = new Size(567, 444);
+            MethodsPanel.TabIndex = 3;
+            MethodsPanel.WrapContents = false;
             // 
             // ImportButton
             // 
@@ -155,28 +163,77 @@
             TagFilterComboBox.TabIndex = 3;
             TagFilterComboBox.UseAccent = false;
             // 
-            // materialDivider1
+            // MainPanel
             // 
-            materialDivider1.BackColor = Color.FromArgb(30, 0, 0, 0);
-            materialDivider1.Depth = 0;
-            materialDivider1.Location = new Point(899, 364);
-            materialDivider1.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
-            materialDivider1.Name = "materialDivider1";
-            materialDivider1.Size = new Size(75, 23);
-            materialDivider1.TabIndex = 5;
-            materialDivider1.Text = "materialDivider1";
+            MainPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            MainPanel.Controls.Add(LeftSplitter);
+            MainPanel.Controls.Add(PlanPanel);
+            MainPanel.Controls.Add(RunPanel);
+            MainPanel.Controls.Add(MethodsPanel);
+            MainPanel.Location = new Point(7, 191);
+            MainPanel.Name = "MainPanel";
+            MainPanel.Size = new Size(1310, 444);
+            MainPanel.TabIndex = 5;
+            // 
+            // LeftSplitter
+            // 
+            LeftSplitter.Location = new Point(567, 0);
+            LeftSplitter.Name = "LeftSplitter";
+            LeftSplitter.Size = new Size(10, 444);
+            LeftSplitter.TabIndex = 6;
+            LeftSplitter.TabStop = false;
+            // 
+            // PlanPanel
+            // 
+            PlanPanel.Controls.Add(StoryPanel);
+            PlanPanel.Dock = DockStyle.Fill;
+            PlanPanel.Location = new Point(567, 0);
+            PlanPanel.Name = "PlanPanel";
+            PlanPanel.Size = new Size(381, 444);
+            PlanPanel.TabIndex = 5;
+            // 
+            // StoryPanel
+            // 
+            StoryPanel.AllowDrop = true;
+            StoryPanel.AutoScroll = true;
+            StoryPanel.BackgroundImageLayout = ImageLayout.Center;
+            StoryPanel.Dock = DockStyle.Fill;
+            StoryPanel.FlowDirection = FlowDirection.TopDown;
+            StoryPanel.Location = new Point(0, 0);
+            StoryPanel.Name = "StoryPanel";
+            StoryPanel.Size = new Size(381, 444);
+            StoryPanel.TabIndex = 0;
+            StoryPanel.WrapContents = false;
+            StoryPanel.DragDrop += StoryPanel_DragDrop;
+            StoryPanel.DragEnter += StoryPanel_DragEnter;
+            // 
+            // RunPanel
+            // 
+            RunPanel.Controls.Add(RightSplitter);
+            RunPanel.Dock = DockStyle.Right;
+            RunPanel.Location = new Point(948, 0);
+            RunPanel.Name = "RunPanel";
+            RunPanel.Size = new Size(362, 444);
+            RunPanel.TabIndex = 4;
+            // 
+            // RightSplitter
+            // 
+            RightSplitter.Location = new Point(0, 0);
+            RightSplitter.Name = "RightSplitter";
+            RightSplitter.Size = new Size(10, 444);
+            RightSplitter.TabIndex = 7;
+            RightSplitter.TabStop = false;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1323, 640);
-            Controls.Add(materialDivider1);
+            Controls.Add(MainPanel);
             Controls.Add(TagFilterComboBox);
             Controls.Add(FilterButton);
             Controls.Add(ActionFilterTextBox);
             Controls.Add(ImportButton);
-            Controls.Add(MethodsFlowPanel);
             ForeColor = Color.White;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
@@ -184,17 +241,25 @@
             TransparencyKey = Color.Fuchsia;
             WindowState = FormWindowState.Maximized;
             Load += MainForm_Load;
+            MainPanel.ResumeLayout(false);
+            PlanPanel.ResumeLayout(false);
+            RunPanel.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-        private FlowLayoutPanel MethodsFlowPanel;
+        private FlowLayoutPanel MethodsPanel;
         private ReaLTaiizor.Controls.MaterialButton ImportButton;
         private ReaLTaiizor.Controls.MaterialTextBoxEdit ActionFilterTextBox;
         private ReaLTaiizor.Controls.PoisonToolTip ToolTipManager;
         private ReaLTaiizor.Controls.MaterialButton FilterButton;
         private ReaLTaiizor.Controls.MaterialComboBox TagFilterComboBox;
-        private ReaLTaiizor.Controls.MaterialDivider materialDivider1;
+        private Panel MainPanel;
+        private Panel RunPanel;
+        private Panel PlanPanel;
+        private Splitter LeftSplitter;
+        private Splitter RightSplitter;
+        private FlowLayoutPanel StoryPanel;
     }
 }

@@ -1,8 +1,12 @@
-﻿namespace Testhardo;
+﻿using ReaLTaiizor.Controls;
+
+namespace Testhardo;
 
 public partial class ActionButton : UserControl
 {
     public Action Action { get; }
+
+    public MaterialButton Button => MainButton;
 
     public ActionButton(Action action)
     {
@@ -15,6 +19,11 @@ public partial class ActionButton : UserControl
         MainButton.Text = action.Name.AsSpan(1).ToString();
 
         ToolTipManager.SetToolTip(MainButton, $"{action.Verb} {action.BaseUrl}{action.Name}");
+
+        foreach (Control control in Controls)
+        {
+            control.MouseDown += (s, e) => OnMouseDown(e);
+        }
     }
 
     private static Color GetActionColor(string httpVerb) => httpVerb switch
