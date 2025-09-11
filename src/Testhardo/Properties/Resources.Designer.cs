@@ -63,16 +63,6 @@ namespace Testhardo.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Download_1 {
-            get {
-                object obj = ResourceManager.GetObject("Download_1", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap download_white {
             get {
                 object obj = ResourceManager.GetObject("download_white", resourceCulture);
@@ -86,6 +76,16 @@ namespace Testhardo.Properties {
         internal static System.Drawing.Bitmap get {
             get {
                 object obj = ResourceManager.GetObject("get", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Get2 {
+            get {
+                object obj = ResourceManager.GetObject("Get2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

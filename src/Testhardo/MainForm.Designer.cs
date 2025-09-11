@@ -35,6 +35,7 @@
             ToolTipManager = new ReaLTaiizor.Controls.PoisonToolTip();
             FilterButton = new ReaLTaiizor.Controls.MaterialButton();
             TagFilterComboBox = new ReaLTaiizor.Controls.MaterialComboBox();
+            materialDivider1 = new ReaLTaiizor.Controls.MaterialDivider();
             SuspendLayout();
             // 
             // MethodsFlowPanel
@@ -154,11 +155,23 @@
             TagFilterComboBox.TabIndex = 3;
             TagFilterComboBox.UseAccent = false;
             // 
+            // materialDivider1
+            // 
+            materialDivider1.BackColor = Color.FromArgb(30, 0, 0, 0);
+            materialDivider1.Depth = 0;
+            materialDivider1.Location = new Point(899, 364);
+            materialDivider1.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
+            materialDivider1.Name = "materialDivider1";
+            materialDivider1.Size = new Size(75, 23);
+            materialDivider1.TabIndex = 5;
+            materialDivider1.Text = "materialDivider1";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1323, 640);
+            Controls.Add(materialDivider1);
             Controls.Add(TagFilterComboBox);
             Controls.Add(FilterButton);
             Controls.Add(ActionFilterTextBox);
@@ -182,5 +195,6 @@
         private ReaLTaiizor.Controls.PoisonToolTip ToolTipManager;
         private ReaLTaiizor.Controls.MaterialButton FilterButton;
         private ReaLTaiizor.Controls.MaterialComboBox TagFilterComboBox;
+        private ReaLTaiizor.Controls.MaterialDivider materialDivider1;
     }
 }

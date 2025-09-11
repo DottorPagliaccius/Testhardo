@@ -85,23 +85,29 @@ public partial class MainForm : MaterialForm
 
     private void AddAction(string baseUrl, string actionName, OpenApiDocument.Operation operation, string httpVerb)
     {
-        var button = new MaterialButton
+        //var button = new MaterialButton
+        //{
+        //    Text = $"{httpVerb} {actionName.AsSpan(1)}",
+        //    Cursor = Cursors.Hand,
+        //    Icon = GetActionIcon(httpVerb),
+        //    IconType = MaterialButton.MaterialIconType.Default,
+        //    Tag = new Action
+        //    {
+        //        BaseUrl = baseUrl,
+        //        Name = actionName,
+        //        Verb = httpVerb,
+        //        Operation = operation
+        //    }
+        //};
+
+        var button = new ActionButton(new Action
         {
-            Text = $"{httpVerb} {actionName.AsSpan(1)}",
-            Cursor = Cursors.Hand,
-            Icon = GetActionIcon(httpVerb),
-            IconType = MaterialButton.MaterialIconType.Default,
-            Tag = new Action
-            {
-                BaseUri = baseUrl,
-                Name = actionName,
-                Verb = httpVerb,
-                Operation = operation
-            }
-        };
-
-        ToolTipManager.SetToolTip(button, $"{httpVerb} {baseUrl}{actionName}");
-
+            BaseUrl = baseUrl,
+            Name = actionName,
+            Verb = httpVerb,
+            Operation = operation
+        });
+        
         MethodsFlowPanel.Controls.Add(button);
     }
 
@@ -109,7 +115,7 @@ public partial class MainForm : MaterialForm
     {
         HttpVerbs.Get => Resources.get,
         HttpVerbs.Post => Resources.download_white,
-        HttpVerbs.Put => null,//Resources.put;
+        HttpVerbs.Put => Resources.Get2,
         HttpVerbs.Delete => null,//Resources.delete;
         _ => null,
     };
@@ -165,7 +171,7 @@ public static class HttpVerbs
 
 public class Action
 {
-    public required string BaseUri { get; set; }
+    public required string BaseUrl { get; set; }
     public required string Name { get; set; }
     public required string Verb { get; set; }
     public required OpenApiDocument.Operation Operation { get; set; }
