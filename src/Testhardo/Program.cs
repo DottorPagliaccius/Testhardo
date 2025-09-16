@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json;
+using Testhardo.Services;
 
 namespace Testhardo;
 
@@ -35,6 +36,10 @@ internal static class Program
         //builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
         builder.Services.AddTransient<MainForm>();
+        builder.Services.AddHttpClient<ApiService>(httpClient => httpClient.Timeout = TimeSpan.FromSeconds(5));
+        builder.Services.AddSingleton<IStoryManager, StoryManager>();
+        builder.Services.AddSingleton<IApiService, ApiService>();
+
         //builder.Services.AddTransient<SomeControl>();
 
         return builder.Build();

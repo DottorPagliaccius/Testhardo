@@ -36,8 +36,9 @@ partial class ActionButton
         // MainButton
         // 
         MainButton.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        MainButton.AutoEllipsis = true;
         MainButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        MainButton.Cursor = Cursors.SizeAll;
+        MainButton.Cursor = Cursors.Hand;
         MainButton.Density = ReaLTaiizor.Controls.MaterialButton.MaterialButtonDensity.Default;
         MainButton.Depth = 0;
         MainButton.HighEmphasis = true;
