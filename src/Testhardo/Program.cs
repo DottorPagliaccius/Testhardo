@@ -40,7 +40,7 @@ internal static class Program
         builder.Services.AddSingleton<IStoryManager, StoryManager>();
         builder.Services.AddSingleton<IApiService, ApiService>();
 
-        //builder.Services.AddTransient<SomeControl>();
+       builder.Services.AddTransient<RunDialog>();
 
         return builder.Build();
     }

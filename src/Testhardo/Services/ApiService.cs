@@ -1,15 +1,12 @@
-﻿using System.Net.Http.Json;
-
-namespace Testhardo.Services;
+﻿namespace Testhardo.Services;
 
 public interface IApiService
 {
-    Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken = default);
-    Task PostAsync<K>(string url, K request, CancellationToken cancellationToken = default);
-    Task<T?> PostAsync<T, K>(string url, K request, CancellationToken cancellationToken = default);
-    Task PatchAsync<K>(string url, K request, CancellationToken cancellationToken = default);
-    Task<T?> PatchAsync<T, K>(string url, K request, CancellationToken cancellationToken = default);
-    Task DeleteAsync(string url, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> GetAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> PostAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> PutAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> PatchAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> DeleteAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default);
 }
 
 public class ApiService : IApiService
@@ -21,59 +18,113 @@ public class ApiService : IApiService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> GetAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default)
     {
-        var client = _httpClientFactory.CreateClient();
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
 
-        return await client.GetFromJsonAsync<T>(url, cancellationToken);
+            client.Timeout = timeout;
+
+            var response = await client.GetAsync(url, cancellationToken);
+
+            return new ServiceResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse { Exception = ex };
+        }
     }
 
-    public async Task<T?> PostAsync<T, K>(string url, K request, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> PostAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
     {
-        var client = _httpClientFactory.CreateClient();
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
 
-        var response = await client.PostAsJsonAsync<K>(url, request, cancellationToken);
+            client.Timeout = timeout;
 
-        response.EnsureSuccessStatusCode();
+            var response = await client.PostAsync(url, new StringContent(jsonRequest), cancellationToken);
 
-        return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            return new ServiceResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse { Exception = ex };
+        }
     }
 
-    public async Task PostAsync<K>(string url, K request, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> PutAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
     {
-        var client = _httpClientFactory.CreateClient();
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
 
-        var response = await client.PostAsJsonAsync<K>(url, request, cancellationToken);
+            client.Timeout = timeout;
 
-        response.EnsureSuccessStatusCode();
+            var response = await client.PutAsync(url, new StringContent(jsonRequest), cancellationToken);
+
+            return new ServiceResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse { Exception = ex };
+        }
     }
 
-    public async Task<T?> PatchAsync<T, K>(string url, K request, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> PatchAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
     {
-        var client = _httpClientFactory.CreateClient();
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
 
-        var response = await client.PatchAsJsonAsync<K>(url, request, cancellationToken);
+            client.Timeout = timeout;
 
-        response.EnsureSuccessStatusCode();
+            var response = await client.PatchAsync(url, new StringContent(jsonRequest), cancellationToken);
 
-        return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            return new ServiceResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse { Exception = ex };
+        }
     }
 
-    public async Task PatchAsync<K>(string url, K request, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> DeleteAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default)
     {
-        var client = _httpClientFactory.CreateClient();
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
 
-        var response = await client.PatchAsJsonAsync<K>(url, request, cancellationToken);
+            client.Timeout = timeout;
 
-        response.EnsureSuccessStatusCode();
-    }
+            var response = await client.DeleteAsync(url, cancellationToken);
 
-    public async Task DeleteAsync(string url, CancellationToken cancellationToken = default)
-    {
-        var client = _httpClientFactory.CreateClient();
-
-        var response = await client.DeleteAsync(url, cancellationToken);
-
-        response.EnsureSuccessStatusCode();
+            return new ServiceResponse
+            {
+                StatusCode = (int)response.StatusCode,
+                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ServiceResponse { Exception = ex };
+        }
     }
 }

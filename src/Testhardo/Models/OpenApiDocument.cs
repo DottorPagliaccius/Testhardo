@@ -23,6 +23,7 @@ public class OpenApiDocument
         public Operation? Get { get; set; }
         public Operation? Post { get; set; }
         public Operation? Put { get; set; }
+        public Operation? Patch { get; set; }
         public Operation? Delete { get; set; }
 
         public IDictionary<string, Operation> Operations => new Dictionary<string, Operation?>
@@ -30,6 +31,7 @@ public class OpenApiDocument
             { HttpVerbs.Get, Get },
             { HttpVerbs.Post, Post },
             { HttpVerbs.Put, Put },
+            { HttpVerbs.Patch, Patch },
             { HttpVerbs.Delete, Delete }
         }.Where(kvp => kvp.Value != null).ToDictionary(kvp => kvp.Key, kvp => kvp.Value!);
     }

@@ -1,9 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using ReaLTaiizor.Colors;
 using ReaLTaiizor.Controls;
 using ReaLTaiizor.Forms;
 using ReaLTaiizor.Manager;
 using ReaLTaiizor.Util;
-using Testhardo.Services;
 using static Testhardo.OpenApiDocument;
 
 namespace Testhardo;
@@ -14,12 +14,11 @@ public partial class MainForm : MaterialForm
 
     private readonly MaterialSkinManager _materialSkinManager;
     private readonly IStoryManager _storyManager;
-    private readonly IApiService _apiService;
-
+    private readonly IServiceProvider _serviceProvider;
     private Story? _currentStory;
     private StoryAction? _currentStoryAction;
 
-    public MainForm(IStoryManager storyManager, IApiService apiService)
+    public MainForm(IStoryManager storyManager, IServiceProvider serviceProvider)
     {
         InitializeComponent();
 
@@ -30,7 +29,7 @@ public partial class MainForm : MaterialForm
         _materialSkinManager.ColorScheme = new MaterialColorScheme(MaterialPrimary.Green600, MaterialPrimary.Green700, MaterialPrimary.Green200, MaterialAccent.Red100, MaterialTextShade.LIGHT);
 
         _storyManager = storyManager;
-        _apiService = apiService;
+        _serviceProvider = serviceProvider;
     }
 
     private void MainForm_Load(object sender, EventArgs e)
@@ -100,7 +99,7 @@ public partial class MainForm : MaterialForm
 
     private void ImportButton_Click(object sender, EventArgs e)
     {
-        using var importDialog = new ImportDialog();
+        using var importDialog = _serviceProvider.GetRequiredService<ImportDialog>();
 
         _materialSkinManager.AddFormToManage(importDialog);
 
@@ -516,7 +515,15 @@ public partial class MainForm : MaterialForm
 
     private void RunButton_Click(object sender, EventArgs e)
     {
-        //TODO
+        if (_currentStory == null )
+            return;
+
+        using var runDialog = _serviceProvider.GetRequiredService<RunDialog>();
+
+        _materialSkinManager.AddFormToManage(runDialog);
+
+        runDialog.StoryToRun = _currentStory;
+        runDialog.ShowDialog();
     }
 }
 
@@ -525,6 +532,7 @@ public static class HttpVerbs
     public const string Get = "GET";
     public const string Post = "POST";
     public const string Put = "PUT";
+    public const string Patch = "PATCH";
     public const string Delete = "DELETE";
 }
 
