@@ -1,125 +1,51 @@
-﻿namespace Testhardo.Services;
+﻿using System.Text;
+
+namespace Testhardo.Services;
 
 public interface IApiService
 {
-    Task<ServiceResponse> GetAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default);
-    Task<ServiceResponse> PostAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
-    Task<ServiceResponse> PutAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
-    Task<ServiceResponse> PatchAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default);
-    Task<ServiceResponse> DeleteAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default);
+    Task<ServiceResponse> SendAsync(HttpMethod method, string url, string? jsonRequest = null, TimeSpan? timeout = null, CancellationToken cancellationToken = default);
 }
 
 public class ApiService : IApiService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
-    public ApiService(IHttpClientFactory httpClientFactory)
+    public ApiService(HttpClient httpClient)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
     }
 
-    public async Task<ServiceResponse> GetAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default)
+    public async Task<ServiceResponse> SendAsync(HttpMethod method, string url, string? jsonRequest = null, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         try
         {
-            var client = _httpClientFactory.CreateClient();
+            using var timeoutCts = timeout.HasValue ? new CancellationTokenSource(timeout.Value) : null;
 
-            client.Timeout = timeout;
+            using var linkedCts = timeoutCts != null ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token) : null;
 
-            var response = await client.GetAsync(url, cancellationToken);
+            var effectiveToken = linkedCts?.Token ?? cancellationToken;
+
+            using var request = new HttpRequestMessage(method, url);
+
+            if (!string.IsNullOrWhiteSpace(jsonRequest))
+                request.Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, effectiveToken);
+
+            var content = await response.Content.ReadAsStringAsync(effectiveToken);
 
             return new ServiceResponse
             {
                 StatusCode = (int)response.StatusCode,
-                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+                JsonResponse = content
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) when (timeout.HasValue)
         {
-            return new ServiceResponse { Exception = ex };
-        }
-    }
-
-    public async Task<ServiceResponse> PostAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-
-            client.Timeout = timeout;
-
-            var response = await client.PostAsync(url, new StringContent(jsonRequest), cancellationToken);
-
             return new ServiceResponse
             {
-                StatusCode = (int)response.StatusCode,
-                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
-            };
-        }
-        catch (Exception ex)
-        {
-            return new ServiceResponse { Exception = ex };
-        }
-    }
-
-    public async Task<ServiceResponse> PutAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-
-            client.Timeout = timeout;
-
-            var response = await client.PutAsync(url, new StringContent(jsonRequest), cancellationToken);
-
-            return new ServiceResponse
-            {
-                StatusCode = (int)response.StatusCode,
-                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
-            };
-        }
-        catch (Exception ex)
-        {
-            return new ServiceResponse { Exception = ex };
-        }
-    }
-
-    public async Task<ServiceResponse> PatchAsync(string url, string jsonRequest, TimeSpan timeout = default, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-
-            client.Timeout = timeout;
-
-            var response = await client.PatchAsync(url, new StringContent(jsonRequest), cancellationToken);
-
-            return new ServiceResponse
-            {
-                StatusCode = (int)response.StatusCode,
-                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
-            };
-        }
-        catch (Exception ex)
-        {
-            return new ServiceResponse { Exception = ex };
-        }
-    }
-
-    public async Task<ServiceResponse> DeleteAsync(string url, TimeSpan timeout = default, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient();
-
-            client.Timeout = timeout;
-
-            var response = await client.DeleteAsync(url, cancellationToken);
-
-            return new ServiceResponse
-            {
-                StatusCode = (int)response.StatusCode,
-                JsonResponse = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken)
+                Exception = new TimeoutException($"Request timed out after {timeout.Value.TotalSeconds} seconds")
             };
         }
         catch (Exception ex)

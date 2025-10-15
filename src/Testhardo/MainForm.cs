@@ -18,6 +18,8 @@ public partial class MainForm : MaterialForm
     private Story? _currentStory;
     private StoryAction? _currentStoryAction;
 
+    //private ActionButton? _lastActionButtonContextMenuSource;
+
     public MainForm(IStoryManager storyManager, IServiceProvider serviceProvider)
     {
         InitializeComponent();
@@ -92,6 +94,12 @@ public partial class MainForm : MaterialForm
             var actionButton = new ActionButton(storyAction.RelativeUrl, storyAction.Verb, storyAction.BaseUrl, storyAction.Id) { Margin = new Padding(7) };
 
             actionButton.Click += ActionButton_Click;
+            actionButton.ContextMenuStrip = ActonButtonContextMenu;
+            //actionButton.MouseDown += (s, e) =>
+            //{
+            //    if (e.Button == MouseButtons.Right) 
+            //        ActonButtonContextMenu.Show(actionButton.PointToScreen(new Point(0, actionButton.Height)));
+            //};
 
             StoryPanel.Controls.Add(actionButton);
         }
@@ -362,18 +370,9 @@ public partial class MainForm : MaterialForm
 
     private void LoadOptions(StoryActionOptions options)
     {
-        if (options.ExecutionMode == StoryActionOptions.Mode.Sequential)
-        {
-            SequentialRadioButton.Checked = true;
-        }
-        else
-        {
-            ParallelRadioButton.Checked = true;
-        }
-
         //EnabledCheckBox.Checked = options.Enabled;
-        CallsCountTextBox.Text = options.Count.ToString();
-        TimeoutTextBox.Text = options.TimeoutInSeconds.ToString();
+        CallsCountTextBox.Text = options.RequestsCount.ToString();
+        ParallelismTextBox.Text = options.DegreeOfParallelism.ToString();
     }
 
     private void LoadParameters(List<StoryActionParameter> parameters)
@@ -473,49 +472,29 @@ public partial class MainForm : MaterialForm
         LoadStories();
     }
 
-    private void ParallelRadioButton_MouseClick(object sender, MouseEventArgs e)
-    {
-        if (_currentStory == null || _currentStoryAction == null)
-            return;
-
-        _currentStoryAction.Options.ExecutionMode = ParallelRadioButton.Checked ? StoryActionOptions.Mode.Parallel : StoryActionOptions.Mode.Sequential;
-
-        _storyManager.SaveStory(_currentStory);
-    }
-
-    private void SequentialRadioButton_MouseClick(object sender, MouseEventArgs e)
-    {
-        if (_currentStory == null || _currentStoryAction == null)
-            return;
-
-        _currentStoryAction.Options.ExecutionMode = ParallelRadioButton.Checked ? StoryActionOptions.Mode.Parallel : StoryActionOptions.Mode.Sequential;
-
-        _storyManager.SaveStory(_currentStory);
-    }
-
     private void CallsCountTextBox_TextChanged(object sender, EventArgs e)
     {
         if (_currentStory == null || _currentStoryAction == null || !int.TryParse(CallsCountTextBox.Text, out var value) || value <= 0)
             return;
 
-        _currentStoryAction.Options.Count = value;
+        _currentStoryAction.Options.RequestsCount = value;
 
         _storyManager.SaveStory(_currentStory);
     }
 
-    private void TimeoutTextBox_TextChanged(object sender, EventArgs e)
+    private void Parallelism_TextChanged(object sender, EventArgs e)
     {
-        if (_currentStory == null || _currentStoryAction == null || !int.TryParse(TimeoutTextBox.Text, out var value) || value <= 0)
+        if (_currentStory == null || _currentStoryAction == null || !int.TryParse(ParallelismTextBox.Text, out var value) || value <= 0)
             return;
 
-        _currentStoryAction.Options.TimeoutInSeconds = value;
+        _currentStoryAction.Options.DegreeOfParallelism = value;
 
         _storyManager.SaveStory(_currentStory);
     }
 
     private void RunButton_Click(object sender, EventArgs e)
     {
-        if (_currentStory == null )
+        if (_currentStory == null)
             return;
 
         using var runDialog = _serviceProvider.GetRequiredService<RunDialog>();
@@ -524,6 +503,28 @@ public partial class MainForm : MaterialForm
 
         runDialog.StoryToRun = _currentStory;
         runDialog.ShowDialog();
+    }
+
+    private void RemoveMenuItem_Click(object sender, EventArgs e)
+    {
+        var sourceControl = ActonButtonContextMenu.SourceControl;
+
+        if (sourceControl is not ActionButton actionButton || _currentStory == null)
+            return;
+
+        var elementToRemoveIndex = StoryPanel.Controls.IndexOf(actionButton);
+
+        if (elementToRemoveIndex == -1)
+            return;
+
+        StoryPanel.Controls.RemoveAt(elementToRemoveIndex);
+
+        if (StoryPanel.Controls.Count > 0)
+            StoryPanel.Controls.RemoveAt(elementToRemoveIndex - 1); //removes THEN
+
+        _currentStory.Actions.RemoveAt(_currentStory.Actions.Keys.FirstOrDefault(x => _currentStory.Actions[x].Id == actionButton.Id));
+
+        _storyManager.SaveStory(_currentStory);
     }
 }
 

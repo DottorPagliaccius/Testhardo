@@ -30,16 +30,17 @@ partial class RunResultControl
     {
         RunProgressBar = new ReaLTaiizor.Controls.MaterialProgressBar();
         TitleLabel = new ReaLTaiizor.Controls.MaterialLabel();
+        ToolTipManager = new ReaLTaiizor.Controls.PoisonToolTip();
         SuspendLayout();
         // 
         // RunProgressBar
         // 
         RunProgressBar.Depth = 0;
-        RunProgressBar.Dock = DockStyle.Right;
-        RunProgressBar.Location = new Point(421, 0);
+        RunProgressBar.Dock = DockStyle.Bottom;
+        RunProgressBar.Location = new Point(0, 28);
         RunProgressBar.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         RunProgressBar.Name = "RunProgressBar";
-        RunProgressBar.Size = new Size(191, 64);
+        RunProgressBar.Size = new Size(612, 10);
         RunProgressBar.Step = 1;
         RunProgressBar.TabIndex = 0;
         RunProgressBar.UseAccentColor = false;
@@ -54,10 +55,16 @@ partial class RunResultControl
         TitleLabel.Location = new Point(10, 0);
         TitleLabel.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         TitleLabel.Name = "TitleLabel";
-        TitleLabel.Size = new Size(412, 64);
+        TitleLabel.Size = new Size(599, 27);
         TitleLabel.TabIndex = 1;
         TitleLabel.Text = "http://address/method";
         TitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // ToolTipManager
+        // 
+        ToolTipManager.Style = ReaLTaiizor.Enum.Poison.ColorStyle.Blue;
+        ToolTipManager.StyleManager = null;
+        ToolTipManager.Theme = ReaLTaiizor.Enum.Poison.ThemeStyle.Light;
         // 
         // RunResultControl
         // 
@@ -66,7 +73,7 @@ partial class RunResultControl
         Controls.Add(TitleLabel);
         Controls.Add(RunProgressBar);
         Name = "RunResultControl";
-        Size = new Size(612, 64);
+        Size = new Size(612, 38);
         ResumeLayout(false);
     }
 
@@ -74,4 +81,5 @@ partial class RunResultControl
 
     private ReaLTaiizor.Controls.MaterialProgressBar RunProgressBar;
     private ReaLTaiizor.Controls.MaterialLabel TitleLabel;
+    private ReaLTaiizor.Controls.PoisonToolTip ToolTipManager;
 }

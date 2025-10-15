@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            var controlRenderer1 = new ReaLTaiizor.ControlRenderer();
+            var msColorTable1 = new ReaLTaiizor.MSColorTable();
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             MethodsPanel = new FlowLayoutPanel();
             ImportButton = new ReaLTaiizor.Controls.MaterialButton();
@@ -59,16 +61,15 @@
             ResponsesTabPage = new TabPage();
             ResponseRichTextBox = new ReaLTaiizor.Controls.MaterialRichTextBox();
             HttpCodesComboBox = new ReaLTaiizor.Controls.MaterialComboBox();
-            SecondsLabel = new ReaLTaiizor.Controls.MaterialLabel();
-            TimeoutTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
-            TimeoutLabel = new ReaLTaiizor.Controls.MaterialLabel();
-            SequentialRadioButton = new ReaLTaiizor.Controls.MaterialRadioButton();
-            ParallelRadioButton = new ReaLTaiizor.Controls.MaterialRadioButton();
+            ParallelismTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
+            ParallelismLabel = new ReaLTaiizor.Controls.MaterialLabel();
             materialLabel1 = new ReaLTaiizor.Controls.MaterialLabel();
             CallsCountTextBox = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
             OptionsTitleLabel = new ReaLTaiizor.Controls.MaterialLabel();
             tabPage3 = new TabPage();
             tabPage4 = new TabPage();
+            ActonButtonContextMenu = new ReaLTaiizor.Controls.FormContextMenuStrip();
+            RemoveMenuItem = new ToolStripMenuItem();
             MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)FirstSplitContainer).BeginInit();
             FirstSplitContainer.Panel1.SuspendLayout();
@@ -86,6 +87,7 @@
             ParametersTabPage.SuspendLayout();
             RequestsTabPage.SuspendLayout();
             ResponsesTabPage.SuspendLayout();
+            ActonButtonContextMenu.SuspendLayout();
             SuspendLayout();
             // 
             // MethodsPanel
@@ -407,7 +409,6 @@
             RunButton.Type = ReaLTaiizor.Controls.MaterialButton.MaterialButtonType.Contained;
             RunButton.UseAccentColor = false;
             RunButton.UseVisualStyleBackColor = true;
-            RunButton.Visible = false;
             RunButton.Click += RunButton_Click;
             // 
             // OptionsPanel
@@ -415,12 +416,9 @@
             OptionsPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             OptionsPanel.BorderStyle = BorderStyle.FixedSingle;
             OptionsPanel.Controls.Add(materialTabSelector1);
-            OptionsPanel.Controls.Add(SecondsLabel);
-            OptionsPanel.Controls.Add(TimeoutTextBox);
-            OptionsPanel.Controls.Add(TimeoutLabel);
+            OptionsPanel.Controls.Add(ParallelismTextBox);
+            OptionsPanel.Controls.Add(ParallelismLabel);
             OptionsPanel.Controls.Add(DetailsTabControl);
-            OptionsPanel.Controls.Add(SequentialRadioButton);
-            OptionsPanel.Controls.Add(ParallelRadioButton);
             OptionsPanel.Controls.Add(materialLabel1);
             OptionsPanel.Controls.Add(CallsCountTextBox);
             OptionsPanel.Location = new Point(3, 111);
@@ -581,102 +579,51 @@
             HttpCodesComboBox.UseAccent = false;
             HttpCodesComboBox.UseTallSize = false;
             // 
-            // SecondsLabel
+            // ParallelismTextBox
             // 
-            SecondsLabel.AutoSize = true;
-            SecondsLabel.Depth = 0;
-            SecondsLabel.Font = new Font("Roboto", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
-            SecondsLabel.Location = new Point(333, 73);
-            SecondsLabel.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
-            SecondsLabel.Name = "SecondsLabel";
-            SecondsLabel.Size = new Size(9, 19);
-            SecondsLabel.TabIndex = 7;
-            SecondsLabel.Text = "s";
+            ParallelismTextBox.AnimateReadOnly = false;
+            ParallelismTextBox.AutoCompleteMode = AutoCompleteMode.None;
+            ParallelismTextBox.AutoCompleteSource = AutoCompleteSource.None;
+            ParallelismTextBox.BackgroundImageLayout = ImageLayout.None;
+            ParallelismTextBox.CharacterCasing = CharacterCasing.Normal;
+            ParallelismTextBox.Depth = 0;
+            ParallelismTextBox.Font = new Font("Roboto", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
+            ParallelismTextBox.HelperText = "calls count";
+            ParallelismTextBox.HideSelection = true;
+            ParallelismTextBox.LeadingIcon = null;
+            ParallelismTextBox.Location = new Point(271, 56);
+            ParallelismTextBox.MaxLength = 32767;
+            ParallelismTextBox.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
+            ParallelismTextBox.Name = "ParallelismTextBox";
+            ParallelismTextBox.PasswordChar = '\0';
+            ParallelismTextBox.PrefixSuffixText = null;
+            ParallelismTextBox.ReadOnly = false;
+            ParallelismTextBox.RightToLeft = RightToLeft.No;
+            ParallelismTextBox.SelectedText = "";
+            ParallelismTextBox.SelectionLength = 0;
+            ParallelismTextBox.SelectionStart = 0;
+            ParallelismTextBox.ShortcutsEnabled = true;
+            ParallelismTextBox.Size = new Size(76, 36);
+            ParallelismTextBox.TabIndex = 6;
+            ParallelismTextBox.TabStop = false;
+            ParallelismTextBox.Text = "10";
+            ParallelismTextBox.TextAlign = HorizontalAlignment.Right;
+            ParallelismTextBox.TrailingIcon = null;
+            ParallelismTextBox.UseSystemPasswordChar = false;
+            ParallelismTextBox.UseTallSize = false;
+            ParallelismTextBox.TextChanged += Parallelism_TextChanged;
             // 
-            // TimeoutTextBox
+            // ParallelismLabel
             // 
-            TimeoutTextBox.AnimateReadOnly = false;
-            TimeoutTextBox.AutoCompleteMode = AutoCompleteMode.None;
-            TimeoutTextBox.AutoCompleteSource = AutoCompleteSource.None;
-            TimeoutTextBox.BackgroundImageLayout = ImageLayout.None;
-            TimeoutTextBox.CharacterCasing = CharacterCasing.Normal;
-            TimeoutTextBox.Depth = 0;
-            TimeoutTextBox.Font = new Font("Roboto", 16F, FontStyle.Regular, GraphicsUnit.Pixel);
-            TimeoutTextBox.HelperText = "calls count";
-            TimeoutTextBox.HideSelection = true;
-            TimeoutTextBox.LeadingIcon = null;
-            TimeoutTextBox.Location = new Point(251, 56);
-            TimeoutTextBox.MaxLength = 32767;
-            TimeoutTextBox.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
-            TimeoutTextBox.Name = "TimeoutTextBox";
-            TimeoutTextBox.PasswordChar = '\0';
-            TimeoutTextBox.PrefixSuffixText = null;
-            TimeoutTextBox.ReadOnly = false;
-            TimeoutTextBox.RightToLeft = RightToLeft.No;
-            TimeoutTextBox.SelectedText = "";
-            TimeoutTextBox.SelectionLength = 0;
-            TimeoutTextBox.SelectionStart = 0;
-            TimeoutTextBox.ShortcutsEnabled = true;
-            TimeoutTextBox.Size = new Size(76, 36);
-            TimeoutTextBox.TabIndex = 6;
-            TimeoutTextBox.TabStop = false;
-            TimeoutTextBox.Text = "10";
-            TimeoutTextBox.TextAlign = HorizontalAlignment.Right;
-            TimeoutTextBox.TrailingIcon = null;
-            TimeoutTextBox.UseSystemPasswordChar = false;
-            TimeoutTextBox.UseTallSize = false;
-            TimeoutTextBox.TextChanged += TimeoutTextBox_TextChanged;
-            // 
-            // TimeoutLabel
-            // 
-            TimeoutLabel.AutoSize = true;
-            TimeoutLabel.Depth = 0;
-            TimeoutLabel.Font = new Font("Roboto", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
-            TimeoutLabel.Location = new Point(185, 73);
-            TimeoutLabel.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
-            TimeoutLabel.Name = "TimeoutLabel";
-            TimeoutLabel.Size = new Size(60, 19);
-            TimeoutLabel.TabIndex = 5;
-            TimeoutLabel.Text = "Timeout";
-            // 
-            // SequentialRadioButton
-            // 
-            SequentialRadioButton.AutoSize = true;
-            SequentialRadioButton.Cursor = Cursors.Hand;
-            SequentialRadioButton.Depth = 0;
-            SequentialRadioButton.Location = new Point(111, 16);
-            SequentialRadioButton.Margin = new Padding(0);
-            SequentialRadioButton.MouseLocation = new Point(-1, -1);
-            SequentialRadioButton.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
-            SequentialRadioButton.Name = "SequentialRadioButton";
-            SequentialRadioButton.Ripple = true;
-            SequentialRadioButton.Size = new Size(110, 37);
-            SequentialRadioButton.TabIndex = 3;
-            SequentialRadioButton.TabStop = true;
-            SequentialRadioButton.Text = "Sequential";
-            SequentialRadioButton.UseAccentColor = false;
-            SequentialRadioButton.UseVisualStyleBackColor = true;
-            SequentialRadioButton.MouseClick += SequentialRadioButton_MouseClick;
-            // 
-            // ParallelRadioButton
-            // 
-            ParallelRadioButton.AutoSize = true;
-            ParallelRadioButton.Checked = true;
-            ParallelRadioButton.Cursor = Cursors.Hand;
-            ParallelRadioButton.Depth = 0;
-            ParallelRadioButton.Location = new Point(14, 16);
-            ParallelRadioButton.Margin = new Padding(0);
-            ParallelRadioButton.MouseLocation = new Point(-1, -1);
-            ParallelRadioButton.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
-            ParallelRadioButton.Name = "ParallelRadioButton";
-            ParallelRadioButton.Ripple = true;
-            ParallelRadioButton.Size = new Size(88, 37);
-            ParallelRadioButton.TabIndex = 2;
-            ParallelRadioButton.TabStop = true;
-            ParallelRadioButton.Text = "Parallel";
-            ParallelRadioButton.UseAccentColor = false;
-            ParallelRadioButton.UseVisualStyleBackColor = true;
-            ParallelRadioButton.MouseClick += ParallelRadioButton_MouseClick;
+            ParallelismLabel.AutoSize = true;
+            ParallelismLabel.Depth = 0;
+            ParallelismLabel.Font = new Font("Roboto", 14F, FontStyle.Regular, GraphicsUnit.Pixel);
+            ParallelismLabel.Location = new Point(185, 73);
+            ParallelismLabel.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
+            ParallelismLabel.Name = "ParallelismLabel";
+            ParallelismLabel.Size = new Size(80, 19);
+            ParallelismLabel.TabIndex = 5;
+            ParallelismLabel.Text = "Parallelism";
             // 
             // materialLabel1
             // 
@@ -754,6 +701,26 @@
             tabPage4.TabIndex = 0;
             tabPage4.Text = "tabPage4";
             // 
+            // ActonButtonContextMenu
+            // 
+            ActonButtonContextMenu.Items.AddRange(new ToolStripItem[] { RemoveMenuItem });
+            ActonButtonContextMenu.Name = "ActonButtonContextMenu";
+            controlRenderer1.ColorTable = msColorTable1;
+            controlRenderer1.RoundedEdges = true;
+            ActonButtonContextMenu.Renderer = controlRenderer1;
+            ActonButtonContextMenu.Size = new Size(114, 26);
+            // 
+            // RemoveMenuItem
+            // 
+            RemoveMenuItem.Font = new Font("Roboto Condensed Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            RemoveMenuItem.ForeColor = Color.FromArgb(80, 80, 80);
+            RemoveMenuItem.Image = (Image)resources.GetObject("RemoveMenuItem.Image");
+            RemoveMenuItem.ImageAlign = ContentAlignment.MiddleLeft;
+            RemoveMenuItem.Name = "RemoveMenuItem";
+            RemoveMenuItem.Size = new Size(113, 22);
+            RemoveMenuItem.Text = "&Remove";
+            RemoveMenuItem.Click += RemoveMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -789,6 +756,7 @@
             ParametersTabPage.ResumeLayout(false);
             RequestsTabPage.ResumeLayout(false);
             ResponsesTabPage.ResumeLayout(false);
+            ActonButtonContextMenu.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -819,8 +787,8 @@
         private TabPage ResponsesTabPage;
         private TabPage tabPage3;
         private TabPage tabPage4;
-        private ReaLTaiizor.Controls.MaterialTextBoxEdit TimeoutTextBox;
-        private ReaLTaiizor.Controls.MaterialLabel TimeoutLabel;
+        private ReaLTaiizor.Controls.MaterialTextBoxEdit ParallelismTextBox;
+        private ReaLTaiizor.Controls.MaterialLabel ParallelismLabel;
         private ReaLTaiizor.Controls.MaterialRichTextBox RequestRichTextBox;
         private TabPage ParametersTabPage;
         private ReaLTaiizor.Controls.MaterialComboBox HttpCodesComboBox;
@@ -828,10 +796,11 @@
         private ReaLTaiizor.Controls.MaterialListView ParametersListView;
         private ColumnHeader ParametersNameColumnHeader;
         private ColumnHeader ParameterValueColumnHeader;
-        private ReaLTaiizor.Controls.MaterialLabel SecondsLabel;
         private ReaLTaiizor.Controls.MaterialButton NewStoryButton;
         private ReaLTaiizor.Controls.MaterialComboBox StoriesComboBox;
         private ReaLTaiizor.Controls.MaterialTabSelector materialTabSelector1;
         private ReaLTaiizor.Controls.MaterialButton RunButton;
+        private ReaLTaiizor.Controls.FormContextMenuStrip ActonButtonContextMenu;
+        private ToolStripMenuItem RemoveMenuItem;
     }
 }

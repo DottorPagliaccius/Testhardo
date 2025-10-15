@@ -43,12 +43,10 @@ public class StoryAction : IEquatable<StoryAction?>
 
 public class StoryActionOptions
 {
-    public enum Mode { Parallel, Sequential }
-
     public bool Enabled { get; set; } = true;
-    public int Count { get; set; } = 1;
+    public int RequestsCount { get; set; } = 1;
     public int TimeoutInSeconds { get; set; } = 10;
-    public Mode ExecutionMode { get; set; } = Mode.Parallel;
+    public int DegreeOfParallelism { get; set; } = 10;
 }
 
 public enum StoryActionParameterType
