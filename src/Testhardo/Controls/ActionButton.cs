@@ -5,34 +5,32 @@ namespace Testhardo;
 public partial class ActionButton : UserControl
 {
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Guid Id { get; }
+    public string Id => Operation.OperationId;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public string MethodName { get; init; }
+    public string MethodName => Operation.Summary is null or "" ? Operation.Path : Operation.Summary;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string BaseUrl { get; init; }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public string Verb { get; init; }
+    public string Verb => Operation.Method;
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public OpenApiDocument.Operation? Operation { get; init; }
+    public OpenApiOperation Operation { get; init; }
 
-    public ActionButton(string name, string verb, string baseUrl, Guid? id = null)
+    public ActionButton(OpenApiOperation operation, string baseUrl)
     {
-        Id = id ?? Guid.NewGuid();
-        MethodName = name;
-        Verb = verb;
+        Operation = operation;
         BaseUrl = baseUrl;
 
         InitializeComponent();
 
-        VerbLabel.Text = verb;
-        VerbLabel.BackColor = Utility.GetActionColor(verb);
-        MainButton.Text = name.AsSpan(1).ToString();
+        VerbLabel.Text = Verb;
+        VerbLabel.BackColor = Utility.GetActionColor(Verb);
+        MainButton.Text = MethodName.AsSpan(1).ToString();
 
-        ToolTipManager.SetToolTip(MainButton, $"{verb} {baseUrl}{name}");
+        ToolTipManager.SetToolTip(MainButton, $"{Verb} {baseUrl}{MethodName}");
 
         foreach (Control control in Controls)
         {
@@ -49,9 +47,6 @@ public partial class ActionButton : UserControl
         get => base.Cursor;
         set
         {
-            if (value == null)
-                return;
-
             base.Cursor = value;
 
             foreach (Control control in Controls)

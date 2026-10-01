@@ -4,7 +4,6 @@ using ReaLTaiizor.Controls;
 using ReaLTaiizor.Forms;
 using ReaLTaiizor.Manager;
 using ReaLTaiizor.Util;
-using static Testhardo.OpenApiDocument;
 
 namespace Testhardo;
 
@@ -91,15 +90,10 @@ public partial class MainForm : MaterialForm
         {
             AddThenSeparator();
 
-            var actionButton = new ActionButton(storyAction.RelativeUrl, storyAction.Verb, storyAction.BaseUrl, storyAction.Id) { Margin = new Padding(7) };
+            var actionButton = new ActionButton(storyAction.Operation, storyAction.BaseUrl) { Margin = new Padding(7) };
 
             actionButton.Click += ActionButton_Click;
             actionButton.ContextMenuStrip = ActonButtonContextMenu;
-            //actionButton.MouseDown += (s, e) =>
-            //{
-            //    if (e.Button == MouseButtons.Right) 
-            //        ActonButtonContextMenu.Show(actionButton.PointToScreen(new Point(0, actionButton.Height)));
-            //};
 
             StoryPanel.Controls.Add(actionButton);
         }
@@ -113,7 +107,7 @@ public partial class MainForm : MaterialForm
 
         var result = importDialog.ShowDialog();
 
-        if (result == DialogResult.OK && importDialog.OpenApiDocument != null && importDialog.BaseUrl != null)
+        if (result == DialogResult.OK && importDialog.Operations.Any() && importDialog.BaseUrl != null)
         {
             try
             {
@@ -123,34 +117,13 @@ public partial class MainForm : MaterialForm
 
                 var baseUrl = importDialog.BaseUrl;
 
-                foreach (var path in importDialog.OpenApiDocument.Paths)
+                foreach (var operation in importDialog.Operations)
                 {
-                    var actionName = path.Key;
-                    var verbs = path.Value;
-
-                    if (verbs.Get != null)
-                    {
-                        AddMethod(baseUrl, actionName, verbs.Get, HttpVerbs.Get);
-                    }
-
-                    if (verbs.Post != null)
-                    {
-                        AddMethod(baseUrl, actionName, verbs.Post, HttpVerbs.Post);
-                    }
-
-                    if (verbs.Put != null)
-                    {
-                        AddMethod(baseUrl, actionName, verbs.Put, HttpVerbs.Put);
-                    }
-
-                    if (verbs.Delete != null)
-                    {
-                        AddMethod(baseUrl, actionName, verbs.Delete, HttpVerbs.Delete);
-                    }
+                    AddMethod(operation, baseUrl);
                 }
 
                 TagFilterComboBox.Items.Clear();
-                TagFilterComboBox.Items.AddRange([.. importDialog.OpenApiDocument.Tags]);
+                //TagFilterComboBox.Items.AddRange([.. importDialog.Operations.Tags]);
             }
             finally
             {
@@ -161,11 +134,10 @@ public partial class MainForm : MaterialForm
         }
     }
 
-    private void AddMethod(string baseUrl, string actionName, OpenApiDocument.Operation operation, string httpVerb)
+    private void AddMethod(OpenApiOperation operation, string baseUrl)
     {
-        var button = new ActionButton(actionName, httpVerb, baseUrl)
+        var button = new ActionButton(operation, baseUrl)
         {
-            Operation = operation,
             Cursor = Cursors.SizeAll
         };
 
@@ -188,11 +160,11 @@ public partial class MainForm : MaterialForm
         {
             foreach (var control in MethodsPanel.Controls.OfType<ActionButton>())
             {
-                var actionNameFound = string.IsNullOrEmpty(actionName) || control.Text.Contains(actionName, StringComparison.OrdinalIgnoreCase);
-
-                var tagFound = string.IsNullOrEmpty(tag) || control.Operation?.Tags.Any(x => x.Contains(tag, StringComparison.OrdinalIgnoreCase)) == true;
-
-                control.Visible = actionNameFound && tagFound;
+                //var actionNameFound = string.IsNullOrEmpty(actionName) || control.Text.Contains(actionName, StringComparison.OrdinalIgnoreCase);
+                //
+                //var tagFound = string.IsNullOrEmpty(tag) || control.Operation?.Tags.Any(x => x.Contains(tag, StringComparison.OrdinalIgnoreCase)) == true;
+                //
+                //control.Visible = actionNameFound && tagFound;
             }
         }
     }
@@ -260,7 +232,7 @@ public partial class MainForm : MaterialForm
         }
     }
 
-    private void AddNewMethodToStory(string name, string verb, string baseUrl, Operation operation)
+    private void AddNewMethodToStory(string name, string verb, string baseUrl, OpenApiOperation operation)
     {
         if (_currentStory == null)
         {
@@ -277,18 +249,18 @@ public partial class MainForm : MaterialForm
 
         AddThenSeparator();
 
-        var actionButton = new ActionButton(name, verb, baseUrl) { Margin = new Padding(7) };
+        var actionButton = new ActionButton(operation, baseUrl) { Margin = new Padding(7) };
 
         actionButton.Click += ActionButton_Click;
 
         StoryPanel.Controls.Add(actionButton);
 
-        CreateStoryAction(actionButton.Id, name, verb, baseUrl, operation);
+        CreateStoryAction(actionButton.Id, baseUrl, operation);
 
         _storyManager.SaveStory(_currentStory);
     }
 
-    private void CreateStoryAction(Guid id, string name, string verb, string baseUrl, Operation operation)
+    private void CreateStoryAction(string id, string baseUrl, OpenApiOperation operation)
     {
         if (_currentStory == null)
             return;
@@ -296,20 +268,11 @@ public partial class MainForm : MaterialForm
         var storyAction = new StoryAction
         {
             Id = id,
-            Verb = verb,
+            Verb = operation.Method,
             BaseUrl = baseUrl,
-            RelativeUrl = name
+            RelativeUrl = operation.Path.Replace(baseUrl, string.Empty),
+            Operation = operation
         };
-
-        foreach (var response in operation.Responses)
-        {
-            storyAction.Responses.Add(int.Parse(response.Key), response.Value.Description); //TODO
-        }
-
-        foreach (var parameter in operation.Parameters)
-        {
-            //storyAction.Parameters.Add(new StoryActionParameter(parameter.Name, parameter.Type)); //TODO
-        }
 
         _currentStory.Actions.Add(_currentStory.Actions.Count, storyAction);
 
@@ -360,9 +323,9 @@ public partial class MainForm : MaterialForm
         RunButton.Visible = true;
 
         LoadOptions(_currentStoryAction.Options);
-        LoadParameters(_currentStoryAction.Parameters);
-        LoadRequestBody(_currentStoryAction.RequestBody);
-        LoadResponses(_currentStoryAction.Responses);
+        LoadParameters(_currentStoryAction.Operation.Parameters);
+        LoadRequestBody(_currentStoryAction.Operation.RequestBody);
+        LoadResponses(_currentStoryAction.Operation.Responses);
 
         if (!OptionsPanel.Visible)
             OptionsPanel.Visible = true;
@@ -375,41 +338,65 @@ public partial class MainForm : MaterialForm
         ParallelismTextBox.Text = options.DegreeOfParallelism.ToString();
     }
 
-    private void LoadParameters(List<StoryActionParameter> parameters)
+    private void LoadParameters(List<OpenApiParameter> parameters)
     {
-        ParametersListView.Items.Clear();
+        if (_currentStory == null || _currentStoryAction == null)
+            return;
+
+        ParametersTableLayoutPanel.SuspendLayout();
+        ParametersTableLayoutPanel.Controls.Clear();
+        ParametersTableLayoutPanel.RowStyles.Clear();
+        ParametersTableLayoutPanel.RowCount = 0;
 
         foreach (var parameter in parameters)
         {
-            var item = new ListViewItem(parameter.Name)
+            var parameterControl = new QueryParameterControl(parameter.Name, parameter.Type, parameter.Required, parameter.Value ?? parameter.MockValue?.ToString() ?? string.Empty)
             {
-                Tag = parameter
+                Tag = parameter,
+                Dock = DockStyle.Fill
             };
 
-            var value = parameter.Type switch
+            parameterControl.Modified += (sender, e) =>
             {
-                Type stringType when stringType == typeof(string) => stringType.ToString(),
-                Type intType when intType == typeof(int) => int.TryParse(parameter.Value, out var parsedValue) ? parsedValue : int.Parse(parameter.Value),
-                Type boolType when boolType == typeof(bool) => (object)(parameter.Value == bool.TrueString),
-                _ => null,
+                if (sender is not QueryParameterControl control)
+                    return;
+
+                _currentStoryAction.Operation.Parameters.Single(x => x.Name == control.ParameterName).Value = control.Value;
+
+                _storyManager.SaveStory(_currentStory);
             };
 
-            item.SubItems.Add(value?.ToString() ?? string.Empty);
-
-            ParametersListView.Items.Add(item);
+            ParametersTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            ParametersTableLayoutPanel.Controls.Add(parameterControl, 0, ParametersTableLayoutPanel.RowCount++);
         }
+
+        ParametersTableLayoutPanel.ResumeLayout();
     }
 
-    private void LoadRequestBody(string? requestBody)
+    private void LoadRequestBody(OpenApiRequestBody? requestBody)
     {
-        if (string.IsNullOrEmpty(requestBody))
+        if (requestBody?.Schema == null)
+        {
+            RequestRichTextBox.Text = "No request body defined for this operation";
+            RequestRichTextBox.Enabled = false;
             return;
+        }
 
-        RequestRichTextBox.Text = requestBody;
+        RequestRichTextBox.Text = requestBody.Value ?? requestBody.Schema;
         RequestRichTextBox.Enabled = true;
     }
 
-    private void LoadResponses(Dictionary<int, string> responses)
+    private void RequestRichTextBox_TextChanged(object sender, EventArgs e)
+    {
+        if (_currentStory == null || _currentStoryAction == null || _currentStoryAction.Operation.RequestBody == null)
+            return;
+
+        _currentStoryAction.Operation.RequestBody.Value = RequestRichTextBox.Text;
+
+        _storyManager.SaveStory(_currentStory);
+    }
+
+    private void LoadResponses(Dictionary<string, OpenApiResponse> responses)
     {
         if (responses.Count == 0)
             return;
@@ -422,16 +409,16 @@ public partial class MainForm : MaterialForm
     private void HttpCodesComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (HttpCodesComboBox.SelectedIndex == -1 ||
-            HttpCodesComboBox.Tag is not Dictionary<int, string> ||
-            HttpCodesComboBox.SelectedValue is not int code)
+            HttpCodesComboBox.Tag is not Dictionary<string, OpenApiResponse> ||
+            HttpCodesComboBox.SelectedValue is not string code)
         {
             return;
         }
 
-        var responses = (Dictionary<int, string>)HttpCodesComboBox.Tag!;
+        var responses = (Dictionary<string, OpenApiResponse>)HttpCodesComboBox.Tag!;
 
         if (responses.TryGetValue(code, out var response))
-            ResponseRichTextBox.Text = response;
+            ResponseRichTextBox.Text = response.Schema;
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -542,7 +529,7 @@ public class Method
     public required string BaseUrl { get; set; }
     public required string Name { get; set; }
     public required string Verb { get; set; }
-    public required Operation Operation { get; set; }
+    public required OpenApiOperation Operation { get; set; }
 }
 
 public class Action

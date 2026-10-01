@@ -1,6 +1,5 @@
 ﻿using ReaLTaiizor.Forms;
 using System.ComponentModel;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -8,6 +7,8 @@ namespace Testhardo;
 
 public partial class ImportDialog : MaterialForm
 {
+    private readonly OpenApiParser _parser = new();
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Uri? SwaggerUri { get; set; }
 
@@ -15,7 +16,7 @@ public partial class ImportDialog : MaterialForm
     public string? BaseUrl => SwaggerUri == null ? null : SwaggerUrlRegex().Replace(SwaggerUri.AbsoluteUri, string.Empty);
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public OpenApiDocument? OpenApiDocument { get; set; }
+    public IEnumerable<OpenApiOperation> Operations { get; set; } = [];
 
     public ImportDialog()
     {
@@ -46,7 +47,7 @@ public partial class ImportDialog : MaterialForm
         Enabled = true;
         Cursor = Cursors.Default;
 
-        if (OpenApiDocument == null)
+        if (!Operations.Any())
             return;
 
         DialogResult = DialogResult.OK;
@@ -68,23 +69,17 @@ public partial class ImportDialog : MaterialForm
 
         try
         {
-            var httpClient = new HttpClient();
-
-            var response = await httpClient.GetAsync(SwaggerUri);
-
-            response.EnsureSuccessStatusCode();
-
-            OpenApiDocument = await response.Content.ReadFromJsonAsync<OpenApiDocument>();
+            Operations = await _parser.ParseAsync(SwaggerUri.AbsoluteUri);
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
             ErrorLabel.Text = "Error fetching Swagger document";
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
             ErrorLabel.Text = "Error parsing Swagger document";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             ErrorLabel.Text = "Unexpected error";
         }

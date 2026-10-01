@@ -46,7 +46,7 @@ internal static class Program
                         })
                         .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
                         {
-                            MaxConnectionsPerServer = 200, 
+                            MaxConnectionsPerServer = 200,
                             PooledConnectionLifetime = TimeSpan.FromMinutes(10),
                             PooledConnectionIdleTimeout = TimeSpan.FromMinutes(5),
                             AutomaticDecompression = DecompressionMethods.None,

@@ -7,7 +7,7 @@ public class Story : IEquatable<Story?>
 
     public OrderedDictionary<int, StoryAction> Actions { get; init; } = [];
 
-    public StoryAction? GetAction(Guid id) => Actions.Values.SingleOrDefault(x => x.Id == id);
+    public StoryAction? GetAction(string id) => Actions.Values.SingleOrDefault(x => x.Id == id);
 
     #region Equality
     public override bool Equals(object? obj) => Equals(obj as Story);
@@ -20,7 +20,7 @@ public class Story : IEquatable<Story?>
 
 public class StoryAction : IEquatable<StoryAction?>
 {
-    public required Guid Id { get; init; }
+    public required string Id { get; init; }
     public string Description => RelativeUrl.Length > 0 ? RelativeUrl[1..] : string.Empty;
     public required string Verb { get; init; }
     public required string BaseUrl { get; init; }
@@ -28,9 +28,7 @@ public class StoryAction : IEquatable<StoryAction?>
 
     public StoryActionOptions Options { get; } = new();
 
-    public List<StoryActionParameter> Parameters { get; init; } = [];
-    public string? RequestBody { get; init; }
-    public Dictionary<int, string> Responses { get; init; } = [];
+    public required OpenApiOperation Operation { get; init; }
 
     #region Equality
     public override bool Equals(object? obj) => Equals(obj as StoryAction);
@@ -48,11 +46,3 @@ public class StoryActionOptions
     public int TimeoutInSeconds { get; set; } = 10;
     public int DegreeOfParallelism { get; set; } = 10;
 }
-
-public enum StoryActionParameterType
-{
-    Query,
-    Path
-}
-
-public record StoryActionParameter(string Name, string Value, Type Type, StoryActionParameterType ParameterType, bool IsRequired = false);

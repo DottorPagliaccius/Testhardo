@@ -66,6 +66,12 @@ public partial class RunResultControl : UserControl
         if (StoryAction == null)
             throw new InvalidOperationException("StoryAction is not set");
 
+        if (StoryAction.Operation.RequestBody != null && !StoryAction.Operation.RequestBody.Validate(out var error))
+            throw new InvalidOperationException($"Invalid request body: {error}");
+
+        if (StoryAction.Operation.Parameters.Count != 0 && StoryAction.Operation.Parameters.Any(x => !x.IsValid))
+            throw new InvalidOperationException($"Invalid parameters: {string.Join(", ", StoryAction.Operation.Parameters.Where(x => !x.IsValid).Select(x => x.Name))}");
+
         _cancellationTokenSource = new CancellationTokenSource();
 
         var cancellationToken = _cancellationTokenSource.Token;
@@ -74,8 +80,26 @@ public partial class RunResultControl : UserControl
         var timeout = TimeSpan.FromSeconds(StoryAction.Options.TimeoutInSeconds);
         var verb = HttpMethod.Parse(StoryAction.Verb);
         var url = StoryAction.BaseUrl + StoryAction.RelativeUrl;
-        var requestJson = StoryAction.RequestBody;
+        var requestJson = StoryAction.Operation.RequestBody?.Value;
         var degreeOfParallelism = StoryAction.Options.DegreeOfParallelism;
+
+        if (StoryAction.Operation.Parameters.Count != 0)
+        {
+            var queryParameters = StoryAction.Operation.Parameters.Where(x => x.In == "query" && !string.IsNullOrEmpty(x.Value)).ToList();
+
+            if (queryParameters.Count > 0)
+            {
+                var queryString = string.Join("&", queryParameters.Select(x => $"{x.Name}={Uri.EscapeDataString(x.Value!)}"));
+                url += "?" + queryString;
+            }
+
+            var urlParameters = StoryAction.Operation.Parameters.Where(x => x.In == "path" && !string.IsNullOrEmpty(x.Value)).ToList();
+
+            foreach (var param in urlParameters)
+            {
+                url = url.Replace($"{{{param.Name}}}", Uri.EscapeDataString(param.Value!));
+            }
+        }
 
         IsRunning = true;
         RunProgressBar.Maximum = requestsCount;

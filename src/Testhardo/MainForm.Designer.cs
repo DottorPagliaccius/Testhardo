@@ -53,9 +53,7 @@
             materialTabSelector1 = new ReaLTaiizor.Controls.MaterialTabSelector();
             DetailsTabControl = new ReaLTaiizor.Controls.MaterialTabControl();
             ParametersTabPage = new TabPage();
-            ParametersListView = new ReaLTaiizor.Controls.MaterialListView();
-            ParametersNameColumnHeader = new ColumnHeader();
-            ParameterValueColumnHeader = new ColumnHeader();
+            ParametersTableLayoutPanel = new TableLayoutPanel();
             RequestsTabPage = new TabPage();
             RequestRichTextBox = new ReaLTaiizor.Controls.MaterialRichTextBox();
             ResponsesTabPage = new TabPage();
@@ -460,7 +458,7 @@
             // 
             // ParametersTabPage
             // 
-            ParametersTabPage.Controls.Add(ParametersListView);
+            ParametersTabPage.Controls.Add(ParametersTableLayoutPanel);
             ParametersTabPage.Location = new Point(4, 24);
             ParametersTabPage.Name = "ParametersTabPage";
             ParametersTabPage.Padding = new Padding(3);
@@ -469,33 +467,18 @@
             ParametersTabPage.Text = "Parameters";
             ParametersTabPage.UseVisualStyleBackColor = true;
             // 
-            // ParametersListView
+            // ParametersTableLayoutPanel
             // 
-            ParametersListView.AutoSizeTable = false;
-            ParametersListView.BackColor = Color.FromArgb(255, 255, 255);
-            ParametersListView.BorderStyle = BorderStyle.None;
-            ParametersListView.Columns.AddRange(new ColumnHeader[] { ParametersNameColumnHeader, ParameterValueColumnHeader });
-            ParametersListView.Depth = 0;
-            ParametersListView.Dock = DockStyle.Fill;
-            ParametersListView.FullRowSelect = true;
-            ParametersListView.Location = new Point(3, 3);
-            ParametersListView.MinimumSize = new Size(200, 100);
-            ParametersListView.MouseLocation = new Point(-1, -1);
-            ParametersListView.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
-            ParametersListView.Name = "ParametersListView";
-            ParametersListView.OwnerDraw = true;
-            ParametersListView.Size = new Size(385, 269);
-            ParametersListView.TabIndex = 0;
-            ParametersListView.UseCompatibleStateImageBehavior = false;
-            ParametersListView.View = View.Details;
-            // 
-            // ParametersNameColumnHeader
-            // 
-            ParametersNameColumnHeader.Text = "";
-            // 
-            // ParameterValueColumnHeader
-            // 
-            ParameterValueColumnHeader.Text = "";
+            ParametersTableLayoutPanel.AutoScroll = true;
+            ParametersTableLayoutPanel.ColumnCount = 1;
+            ParametersTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            ParametersTableLayoutPanel.Dock = DockStyle.Fill;
+            ParametersTableLayoutPanel.Location = new Point(3, 3);
+            ParametersTableLayoutPanel.Name = "ParametersTableLayoutPanel";
+            ParametersTableLayoutPanel.RowCount = 1;
+            ParametersTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            ParametersTableLayoutPanel.Size = new Size(385, 269);
+            ParametersTableLayoutPanel.TabIndex = 0;
             // 
             // RequestsTabPage
             // 
@@ -524,6 +507,7 @@
             RequestRichTextBox.Size = new Size(385, 269);
             RequestRichTextBox.TabIndex = 0;
             RequestRichTextBox.Text = "";
+            RequestRichTextBox.TextChanged += RequestRichTextBox_TextChanged;
             // 
             // ResponsesTabPage
             // 
@@ -793,14 +777,12 @@
         private TabPage ParametersTabPage;
         private ReaLTaiizor.Controls.MaterialComboBox HttpCodesComboBox;
         private ReaLTaiizor.Controls.MaterialRichTextBox ResponseRichTextBox;
-        private ReaLTaiizor.Controls.MaterialListView ParametersListView;
-        private ColumnHeader ParametersNameColumnHeader;
-        private ColumnHeader ParameterValueColumnHeader;
         private ReaLTaiizor.Controls.MaterialButton NewStoryButton;
         private ReaLTaiizor.Controls.MaterialComboBox StoriesComboBox;
         private ReaLTaiizor.Controls.MaterialTabSelector materialTabSelector1;
         private ReaLTaiizor.Controls.MaterialButton RunButton;
         private ReaLTaiizor.Controls.FormContextMenuStrip ActonButtonContextMenu;
         private ToolStripMenuItem RemoveMenuItem;
+        private TableLayoutPanel ParametersTableLayoutPanel;
     }
 }
