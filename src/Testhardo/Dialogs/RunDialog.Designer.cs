@@ -57,7 +57,7 @@ partial class RunDialog
         // 
         RunPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
         RunPanel.AutoScroll = true;
-        RunPanel.Location = new Point(6, 27);
+        RunPanel.Location = new Point(3, 27);
         RunPanel.Name = "RunPanel";
         RunPanel.Size = new Size(480, 472);
         RunPanel.TabIndex = 0;
@@ -72,12 +72,12 @@ partial class RunDialog
         LogRichTextBox.Font = new Font("Microsoft Sans Serif", 10F);
         LogRichTextBox.ForeColor = Color.FromArgb(222, 0, 0, 0);
         LogRichTextBox.Hint = "";
-        LogRichTextBox.Location = new Point(492, 27);
+        LogRichTextBox.Location = new Point(489, 27);
         LogRichTextBox.MaxLength = 32767;
         LogRichTextBox.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         LogRichTextBox.Name = "LogRichTextBox";
         LogRichTextBox.ReadOnly = true;
-        LogRichTextBox.Size = new Size(535, 472);
+        LogRichTextBox.Size = new Size(596, 472);
         LogRichTextBox.TabIndex = 1;
         LogRichTextBox.Text = "";
         LogRichTextBox.WordWrap = false;
@@ -99,7 +99,7 @@ partial class RunDialog
         StatisticsPanel.Controls.Add(MinLabel);
         StatisticsPanel.Controls.Add(AverageLabel);
         StatisticsPanel.Controls.Add(TotalLabel);
-        StatisticsPanel.Location = new Point(1033, 27);
+        StatisticsPanel.Location = new Point(1091, 27);
         StatisticsPanel.Name = "StatisticsPanel";
         StatisticsPanel.Size = new Size(389, 424);
         StatisticsPanel.TabIndex = 2;
@@ -312,7 +312,7 @@ partial class RunDialog
         RunButton.HighEmphasis = true;
         RunButton.Icon = null;
         RunButton.IconType = ReaLTaiizor.Controls.MaterialButton.MaterialIconType.Rebase;
-        RunButton.Location = new Point(1358, 460);
+        RunButton.Location = new Point(1416, 460);
         RunButton.Margin = new Padding(4, 6, 4, 6);
         RunButton.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         RunButton.Name = "RunButton";
@@ -335,7 +335,7 @@ partial class RunDialog
         StopButton.HighEmphasis = true;
         StopButton.Icon = null;
         StopButton.IconType = ReaLTaiizor.Controls.MaterialButton.MaterialIconType.Rebase;
-        StopButton.Location = new Point(1034, 460);
+        StopButton.Location = new Point(1092, 460);
         StopButton.Margin = new Padding(4, 6, 4, 6);
         StopButton.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         StopButton.Name = "StopButton";
@@ -359,7 +359,7 @@ partial class RunDialog
         ExitButton.HighEmphasis = true;
         ExitButton.Icon = null;
         ExitButton.IconType = ReaLTaiizor.Controls.MaterialButton.MaterialIconType.Rebase;
-        ExitButton.Location = new Point(1195, 463);
+        ExitButton.Location = new Point(1253, 463);
         ExitButton.Margin = new Padding(4, 6, 4, 6);
         ExitButton.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
         ExitButton.Name = "ExitButton";
@@ -378,7 +378,7 @@ partial class RunDialog
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         CancelButton = ExitButton;
-        ClientSize = new Size(1428, 505);
+        ClientSize = new Size(1486, 505);
         Controls.Add(ExitButton);
         Controls.Add(StopButton);
         Controls.Add(RunButton);

@@ -507,7 +507,12 @@ public partial class MainForm : MaterialForm
         StoryPanel.Controls.RemoveAt(elementToRemoveIndex);
 
         if (StoryPanel.Controls.Count > 0)
-            StoryPanel.Controls.RemoveAt(elementToRemoveIndex - 1); //removes THEN
+        {
+            if (elementToRemoveIndex == 0)
+                StoryPanel.Controls.RemoveAt(elementToRemoveIndex);
+            else
+                StoryPanel.Controls.RemoveAt(elementToRemoveIndex - 1);
+        }
 
         _currentStory.Actions.RemoveAt(_currentStory.Actions.Keys.FirstOrDefault(x => _currentStory.Actions[x].Id == actionButton.Id));
 

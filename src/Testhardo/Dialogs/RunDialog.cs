@@ -55,12 +55,18 @@ public partial class RunDialog : MaterialForm
             runResultControl.StoryAction = action.Value;
             runResultControl.Width = RunPanel.Width - 10;
 
-            runResultControl.Completed += async (_, __) => await StartNextAsync();
+            runResultControl.Completed += async (_, __) =>
+            {
+                ShowStatistics(action.Value.RelativeUrl, runResultControl.Statistics);
+
+                await StartNextAsync();
+            };
+
             runResultControl.Click += (_, __) => ShowStatistics(action.Value.RelativeUrl, runResultControl.Statistics);
             runResultControl.ServiceCalled += (_, e) =>
             {
-                ShowStatistics(action.Value.RelativeUrl, runResultControl.Statistics);
                 Log(e.Verb, e.Url, e.Response, e.ElapsedTime, e.Index, e.Total);
+                ShowStatistics(action.Value.RelativeUrl, runResultControl.Statistics);
             };
 
             RunPanel.Controls.Add(runResultControl);
@@ -125,13 +131,12 @@ public partial class RunDialog : MaterialForm
 
     private async void RunButton_Click(object sender, EventArgs e)
     {
+        StopButton.Enabled = true;
         RunButton.Enabled = false;
         LogRichTextBox.Clear();
 
         foreach (var control in RunPanel.Controls.OfType<RunResultControl>())
-        {
             control.Reset();
-        }
 
         var runControl = RunPanel.Controls.OfType<RunResultControl>().FirstOrDefault(x => !x.IsCompleted);
 
@@ -144,9 +149,7 @@ public partial class RunDialog : MaterialForm
     private void StopButton_Click(object sender, EventArgs e)
     {
         foreach (var control in RunPanel.Controls.OfType<RunResultControl>().Where(x => !x.IsCompleted))
-        {
             control.Stop();
-        }
     }
 
     private void RunDialog_FormClosing(object sender, FormClosingEventArgs e)

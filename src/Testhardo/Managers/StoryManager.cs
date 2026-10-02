@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Testhardo;
 
@@ -21,19 +20,15 @@ public class StoryManager : IStoryManager
         if (!Directory.Exists(_path))
             return new Dictionary<Guid, string>();
 
-        var stories = new ConcurrentDictionary<Guid, string>();
+        var stories = new Dictionary<Guid, string>();
 
-        var files = Directory.GetFiles(_path, "*.json");
-
-        Parallel.ForEach(files, file =>
+        foreach(var file in Directory.GetFiles(_path, "*.json"))
         {
             var story = JsonSerializer.Deserialize<Story>(File.ReadAllText(file), Program.DefaultJsonSerializerOptions);
 
-            if (story is null)
-                return;
-
-            stories.TryAdd(story.Id, story.Description);
-        });
+            if (story is not null)
+                stories[story.Id] = story.Description;
+        }
 
         return stories;
     }

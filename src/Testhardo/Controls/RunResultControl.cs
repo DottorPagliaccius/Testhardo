@@ -1,6 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Security.Policy;
+using System.Text.RegularExpressions;
+using System.Threading.Channels;
 using Testhardo.Services;
 
 namespace Testhardo;
@@ -9,6 +12,9 @@ public record ServiceCalledEventArgs(string Verb, string Url, ServiceResponse Re
 
 public partial class RunResultControl : UserControl
 {
+    private int _completedCount;
+    private ServiceResponse? _lastResponse;
+
     private CancellationTokenSource _cancellationTokenSource = new();
 
     private readonly IApiService _apiService;
@@ -76,6 +82,9 @@ public partial class RunResultControl : UserControl
 
         var cancellationToken = _cancellationTokenSource.Token;
 
+        _completedCount = 0;
+        _lastResponse = null;
+
         var requestsCount = StoryAction.Options.RequestsCount;
         var timeout = TimeSpan.FromSeconds(StoryAction.Options.TimeoutInSeconds);
         var verb = HttpMethod.Parse(StoryAction.Verb);
@@ -108,92 +117,54 @@ public partial class RunResultControl : UserControl
         var timings = new ConcurrentBag<double>();
         var responses = new ConcurrentQueue<(TimeSpan Elapsed, int Index, ServiceResponse Response)>();
         var totalStopwatch = Stopwatch.StartNew();
-        var completedCount = 0;
 
-        var uiUpdateTask = Task.Run(async () =>
-        {
-            using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(500));
+        var uiUpdateTask = UpdateUIAsync(requestsCount, timings, totalStopwatch, cancellationToken);
 
-            while (await timer.WaitForNextTickAsync(cancellationToken))
-            {
-                var current = completedCount;
-
-                UpdatetStatistics([.. timings], totalStopwatch.Elapsed);
-                UpdateProgressBar(current);
-
-                var batch = new List<(TimeSpan Elapsed, int Index, ServiceResponse Response)>();
-
-                while (responses.TryDequeue(out var response))
-                {
-                    batch.Add(response);
-
-                    if (batch.Count >= 10)
-                        break;
-                }
-
-                foreach (var item in batch)
-                {
-                    FireServiceCalledEvent(verb.ToString(), url, item.Response, item.Elapsed, item.Index, requestsCount);
-                }
-
-                if (current >= requestsCount)
-                    break;
-            }
-        }, cancellationToken);
+        var channel = Channel.CreateUnbounded<(TimeSpan Elapsed, int Index, ServiceResponse Response)>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
+        var readFromChannelTask = ReadFromChannelAsync(channel, verb, url, requestsCount, cancellationToken);
 
         try
         {
             var throttler = new SemaphoreSlim(degreeOfParallelism);
+
             var tasks = new Task[requestsCount];
 
             for (var i = 0; i < requestsCount; i++)
             {
-                var index = i + 1;
-                await throttler.WaitAsync(cancellationToken);
-
-                tasks[i] = Task.Run(async () =>
+                try
                 {
-                    try
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                            return;
+                    await throttler.WaitAsync(cancellationToken);
 
-                        var stopwatch = Stopwatch.StartNew();
-
-                        var response = await _apiService.SendAsync(verb, url, requestJson, timeout, cancellationToken);
-
-                        stopwatch.Stop();
-
-                        responses.Enqueue((stopwatch.Elapsed, index, response));
-
-                        timings.Add(stopwatch.Elapsed.TotalMilliseconds);
-
-                        Interlocked.Increment(ref completedCount);
-                    }
-                    finally
-                    {
-                        throttler.Release();
-                    }
-                }, cancellationToken);
+                    tasks[i] = ExecuteRequestAsync(verb, url, requestJson, timeout, i + 1, throttler, channel, timings, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
 
             await Task.WhenAll(tasks);
+
+            totalStopwatch.Stop();
+
             await uiUpdateTask;
+
+            channel.Writer.Complete();
+
+            await readFromChannelTask;
         }
         finally
         {
-            totalStopwatch.Stop();
-
-            Response = responses.LastOrDefault().Response;
+            Response = _lastResponse;
 
             IsCompleted = true;
+
             if (Response?.Exception != null)
                 IsCompletedInError = true;
 
             IsRunning = false;
 
-            UpdateProgressBar(completedCount);
-            UpdatetStatistics([.. timings], totalStopwatch.Elapsed);
+            UpdateProgressBar(_completedCount);
+            UpdateStatistics([.. timings], totalStopwatch.Elapsed);
 
             if (InvokeRequired)
                 BeginInvoke(() => Completed?.Invoke(this, Response!));
@@ -202,16 +173,64 @@ public partial class RunResultControl : UserControl
         }
     }
 
+    private async Task ReadFromChannelAsync(Channel<(TimeSpan Elapsed, int Index, ServiceResponse Response)> channel, HttpMethod verb, string url, int requestsCount, CancellationToken cancellationToken)
+    {
+        await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+            FireServiceCalledEvent(verb.ToString(), url, item.Response, item.Elapsed, item.Index, requestsCount);
+    }
+
+    private async Task UpdateUIAsync(int requestsCount, ConcurrentBag<double> timings, Stopwatch totalStopwatch, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(500));
+
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                UpdateStatistics([.. timings], totalStopwatch.Elapsed);
+
+                var current = Volatile.Read(ref _completedCount);
+
+                UpdateProgressBar(current);
+
+                if (current >= requestsCount)
+                    break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task ExecuteRequestAsync(HttpMethod verb, string url, string? requestJson, TimeSpan timeout, int index, SemaphoreSlim throttler, Channel<(TimeSpan Elapsed, int Index, ServiceResponse Response)> responses, ConcurrentBag<double> timings, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _apiService.SendAsync(verb, url, requestJson, timeout, cancellationToken).ConfigureAwait(false);
+
+            _lastResponse = response;
+
+            timings.Add(response.ResponseTime.TotalMilliseconds);
+
+            Interlocked.Increment(ref _completedCount);
+
+            await responses.Writer.WriteAsync((response.ResponseTime, index, response), cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            throttler.Release();
+        }
+    }
+
     private void UpdateProgressBar(int value)
     {
         if (!InvokeRequired)
-        {
             RunProgressBar.Value = Math.Min(value, RunProgressBar.Maximum);
-        }
         else
-        {
             BeginInvoke(() => RunProgressBar.Value = Math.Min(value, RunProgressBar.Maximum));
-        }
     }
 
     private void FireServiceCalledEvent(string verb, string url, ServiceResponse serviceResponse, TimeSpan elapsedTime, int? index = null, int? total = null)
@@ -255,7 +274,7 @@ public partial class RunResultControl : UserControl
         return sortedValues[index] + (fraction * (sortedValues[index + 1] - sortedValues[index]));
     }
 
-    private void UpdatetStatistics(double[] timings, TimeSpan totalElapsed)
+    private void UpdateStatistics(double[] timings, TimeSpan totalElapsed)
     {
         if (timings.Length == 0 || totalElapsed == TimeSpan.Zero)
         {
@@ -265,14 +284,18 @@ public partial class RunResultControl : UserControl
 
         Array.Sort(timings);
 
+        var average = timings.Average();
+        var variance = timings.Average(x => Math.Pow(x - average, 2));
+        var standardDeviation = Math.Sqrt(variance);
+
         Statistics = new Statistics
         {
             Count = timings.Length,
             Min = timings[0],
             Max = timings[^1],
-            Average = timings.Average(),
+            Average = average,
             Median = timings.Length % 2 == 0 ? (timings[(timings.Length / 2) - 1] + timings[timings.Length / 2]) / 2.0 : timings[timings.Length / 2],
-            StandardDeviation = Math.Sqrt(timings.Average(x => Math.Pow(x - timings.Average(), 2))),
+            StandardDeviation = standardDeviation,
             Percentile50 = Percentile(timings, 50),
             Percentile75 = Percentile(timings, 75),
             Percentile90 = Percentile(timings, 90),

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace Testhardo.Services;
 
@@ -31,14 +32,18 @@ public class ApiService : IApiService
             if (!string.IsNullOrWhiteSpace(jsonRequest))
                 request.Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
+            var stopwatch = Stopwatch.StartNew();
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, effectiveToken);
+
+            stopwatch.Stop();
 
             var content = await response.Content.ReadAsStringAsync(effectiveToken);
 
             return new ServiceResponse
             {
                 StatusCode = (int)response.StatusCode,
-                JsonResponse = content
+                JsonResponse = content,
+                ResponseTime = stopwatch.Elapsed
             };
         }
         catch (OperationCanceledException) when (timeout.HasValue)
